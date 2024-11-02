@@ -32,21 +32,24 @@ export function EditModal({
 
 	if (!isOpen || !editData) return null;
 
-	const handleChange = (key: keyof Product | keyof PricePlan | keyof Page | 'amount' | 'size', value: string) => {
+	const handleChange = (
+		key: keyof Product | keyof PricePlan | keyof Page | 'amount' | 'size',
+		value: string
+	) => {
 		setEditData((prev) => {
 			if (!prev) return prev;
-
-			if (key === "amount" || key === "size") {
+			
+			if ('options' in prev && (key === 'amount' || key === 'size')) {
 				return {
 					...prev,
 					options: {
 						...prev.options,
 						[key]: value,
 					},
-				};
+				} as Product | PricePlan;
 			}
 
-			return { ...prev, [key]: value };
+			return { ...prev, [key]: value } as Product | PricePlan | Page;
 		});
 	};
 
@@ -66,17 +69,16 @@ export function EditModal({
 		<ModalOverlay>
 			<ModalContent>
 				<ModalTitle>Edit Item</ModalTitle>
+				{/* Поля для Page */}
 				{(editData as Page).title !== undefined ? (
-					<>
-						<InputContainer>
-							<Label>Title</Label>
-							<Input
-								type="text"
-								value={(editData as Page).title}
-								onChange={(e) => handleChange("title", e.target.value)}
-							/>
-						</InputContainer>
-					</>
+					<InputContainer>
+						<Label>Title</Label>
+						<Input
+							type="text"
+							value={(editData as Page).title}
+							onChange={(e) => handleChange("title", e.target.value)}
+						/>
+					</InputContainer>
 				) : (editData as PricePlan).description !== undefined ? (
 					<InputContainer>
 						<Label>Description</Label>
@@ -91,34 +93,32 @@ export function EditModal({
 						<Label>Name</Label>
 						<Input
 							type="text"
-							value={editData.name}
+							value={(editData as Product).name}
 							onChange={(e) => handleChange("name", e.target.value)}
 						/>
 					</InputContainer>
 				)}
-				{
-					editData.options !== undefined && (
-						<>
-							<InputContainer>
-								<Label>Amount</Label>
-								<Input
-									type="text"
-									value={editData.options.amount}
-									onChange={(e) => handleChange("amount", e.target.value)}
-								/>
-
-							</InputContainer>
-							<InputContainer>
-								<Label>Size</Label>
-								<Input
-									type="text"
-									value={editData.options.size}
-									onChange={(e) => handleChange("size", e.target.value)}
-								/>
-							</InputContainer>
-						</>
-					)
-				}
+				{/* Поля для options */}
+				{'options' in editData && (
+					<>
+						<InputContainer>
+							<Label>Amount</Label>
+							<Input
+								type="text"
+								value={editData.options.amount}
+								onChange={(e) => handleChange("amount", e.target.value)}
+							/>
+						</InputContainer>
+						<InputContainer>
+							<Label>Size</Label>
+							<Input
+								type="text"
+								value={editData.options.size}
+								onChange={(e) => handleChange("size", e.target.value)}
+							/>
+						</InputContainer>
+					</>
+				)}
 				<InputContainer>
 					<Label>Active</Label>
 					<Select
